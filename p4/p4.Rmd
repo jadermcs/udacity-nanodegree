@@ -55,9 +55,8 @@ ggplot(data=winecsv, aes(x=alcohol)) +
 
 
 ```{r echo=FALSE, message=FALSE}
-ggplot(data=winecsv, aes(x=citric.acid)) +
-  geom_histogram(bins = 50) +
-  scale_x_log10()
+ggplot(data=winecsv, aes(x=volatile.acidity)) +
+  geom_histogram(bins = 50)
 ```
 
 
