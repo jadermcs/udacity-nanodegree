@@ -1,0 +1,51 @@
+---
+title: "Análise de Vinhos Tintos"
+author: "Jader Martins"
+date: "15 de Dezembro, 2017"
+output:
+  html_document:
+    df_print: paged
+---
+
+<style>
+  pre{
+    background-color: #ececec !important;
+  }
+  body{
+    background-color: #323232 !important;
+    color: #f6f6f6 !important;
+  }
+  h2{
+    font-size: 50px !important;
+    color: crimson !important
+  }
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+```
+
+## Introdução
+Essa análise irá explorar um conjunto de dados de vinhos tintos, originalmente construído para modelagem de qualidade do vinho refletida por aspectos químicos de cada bebida. O conjunto de dados tem 1599 registros com 11 variáveis + qualidade do vinho
+
+```{r echo=FALSE, rows.print=3}
+winecsv <- read.csv("wineQualityReds.csv")
+str(winecsv)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+ggplot(data = winecsv, aes(x=quality)) +
+  geom_histogram()
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+# IDEAIS
+correlation plot das variaveis
+
