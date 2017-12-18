@@ -35,17 +35,24 @@ str(winecsv)
 ```
 
 
-```{r pressure, echo=FALSE, error=FALSE, message=FALSE}
+```{r echo=FALSE, error=FALSE, message=FALSE}
 ggplot(data = winecsv, aes(x=quality)) +
   geom_histogram()
 ```
 
-Embora as notas para qualidade do vinho possam ir de 0 a 10 podemos ver que a imensa maioria dos vinhos estão avaliados com notas medianas, 5 e 6, o que torna essa variavel, qualidade, não interessante para analise de regressão, porém posteriormente iremos visualizar algumas regressões para confirmar isso.
+```{r echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+ggplot(data = winecsv, aes(x=quality)) +
+  geom_histogram() +
+  scale_y_log10()
+```
+
+Embora as notas para qualidade do vinho possam ir de 0 a 10 podemos ver que a imensa maioria dos vinhos estão avaliados com notas medianas, 5 e 6, o que torna essa variavel, qualidade, possivelmente não interessante para analise de regressão, porém posteriormente iremos visualizar algumas regressões para confirmar isso.
 
 ```{r echo=FALSE, message=FALSE}
 ggplot(data=winecsv, aes(x=pH)) +
   geom_histogram()
 ```
+
 Vemos que para a variável pH temos uma distribuição normal e poucos outliers, futuramente iremos ver se esses outliers são vinhos piores ou melhores, pertencendo assim as classes de vinhos de qualidade fora da média.
 
 ```{r echo=FALSE, message=FALSE}
@@ -55,13 +62,16 @@ ggplot(data=winecsv, aes(x=alcohol)) +
 
 
 ```{r echo=FALSE, message=FALSE}
-ggplot(data=winecsv, aes(x=volatile.acidity)) +
+ggplot(data=winecsv, aes(x=free.sulfur.dioxide)) +
   geom_histogram(bins = 50)
 ```
 
 
 # IDEAIS
 correlation plot das variaveis
+
 regressao da qualidade e alguma var
+
 outliers dos dados geram vinhos melhores ou piores?
+
 tentar dividir vinhos por categoria, suave, seco, etc
