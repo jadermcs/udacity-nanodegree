@@ -53,17 +53,19 @@ ggplot(data=winecsv, aes(x=pH)) +
   geom_histogram()
 ```
 
-Vemos que para a variável pH temos uma distribuição normal e poucos outliers, futuramente iremos ver se esses outliers são vinhos piores ou melhores, pertencendo assim as classes de vinhos de qualidade fora da média.
+Para a variável pH temos uma distribuição normal e poucos outliers, futuramente iremos ver se esses outliers são vinhos piores ou melhores.
 
 ```{r echo=FALSE, message=FALSE}
-ggplot(data=winecsv, aes(x=alcohol)) +
-  geom_histogram(bins = 50)
+ggplot(data=winecsv, aes(x=volatile.acidity)) +
+  geom_histogram(bins = 70)
 ```
 
+Para a quantidade de acido acético presente no vinho, podemos ver uma distribuição binormal, dada por vinhos suaves e secos presentes no data set.
 
 ```{r echo=FALSE, message=FALSE}
-ggplot(data=winecsv, aes(x=free.sulfur.dioxide)) +
-  geom_histogram(bins = 50)
+ggplot(data=winecsv, aes(x=residual.sugar)) +
+  geom_histogram(bins = 100) + 
+  xlim(c(0,8))
 ```
 
 
