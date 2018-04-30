@@ -124,9 +124,20 @@ Temos contribuições indo do ano 2008 até 2016, sendo o periodo com maior nume
 de contribuições novembro de 2012.
 
 # Ideias Adicionais
-Mesmo com a grande quantidade de ciclovias em Brasilia, poucas são demarcadas
-no mapa, o que cria seu desconhecimento e desuso, seria interessante se o
-governo do Distrito Federal disponilizasse tal informação no OpenStreetMap.
+Como já citado, as tags não estão muito bem padronizadas quanto a classificações
+, é necessário que se crie uma norma de classificação para os endereços do
+Brasil e especificamento do Distrito Federal que foje um pouco do padrão
+nacional. É possivel ainda fazer diversas melhorias através de dicionários e
+funções ad-hoc para uma maior normalização/padronização dos dados.
+
+Também há muito informação desnecessária, descrições muito detalhadas no campo
+descrição, redundância de informação e etc. Fazendo com que  os dados terem
+ocupem muito mais espaço de armazenamento.
+
+Podemos ver também que apenas um percentual pequeno da população contribui com
+os dados, de tal forma que regiões mais novas ou mais pobres são pouco mapeadas,
+se houvesse uma gamificação quanto a contribuição, talvez mais usuários
+contribuiriam.
 
 ![Entorno, Brasília, Distrito Federal - Brasil](map.png)
 
