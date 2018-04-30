@@ -1,0 +1,124 @@
+---
+title: "Análise de Vinhos Tintos"
+author: "Jader Martins"
+date: "15 de Dezembro, 2017"
+output:
+  html_document:
+    df_print: paged
+---
+
+<style>
+  <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet"> 
+  pre{
+    background-color: #ececec !important;
+  }
+  body{
+    background-color: #323232 !important;
+    color: #f6f6f6 !important;
+    font-family: 'Inconsolata', monospace;
+  }
+  h2{
+    font-size: 48px !important;
+    color: #f75940 !important
+  }
+</style>
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 11)
+library(ggplot2)
+library(dplyr)
+library(reshape2)
+```
+# Introdução
+Essa análise irá explorar um conjunto de dados de vinhos tintos [Cortez et al., 2009], originalmente construído para modelagem da qualidade do vinho refletida por aspectos químicos de cada bebida. O conjunto de dados tem 1599 registros com 11 variáveis (de aspecto químico) + qualidade do vinho (de 0 a 10). Obtive a ajuda de um amigo formado em química para me guiar em possíveis aspectos quimícos que podem gerar um gosto desagradável no vinho, e sob essas hipoteses guiarei minha analise.
+
+```{r echo=FALSE, Load_the_Data}
+# Carregamento dos dados
+winecsv <- read.csv("wineQualityReds.csv")
+acidity <- winecsv %>% select(fixed.acidity, volatile.acidity, citric.acid)
+acidity <- melt(acidity)
+```
+
+# Seção de Gráficos Univariados
+```{r echo=FALSE, Univariate_Plots}
+ggplot(acidity, aes(x=value, fill=variable)) +
+  geom_density()
+
+```
+
+# Análise Univariada
+
+### Qual é a estrutura do conjunto de dados?
+
+### Quais são os principais atributos de interesse deste conjunto de dados?
+
+### Quais outros atributos você acha que podem lhe auxiliar na investigação destes atributos de interesse?
+
+### Você criou novas variáveis a partir dos atributos existentes no conjunto de dados?
+
+### Dos atributos investigados, distribuições incomuns foram encontradas? Você aplicou operações nos dados para limpá-los, ajustá-los ou mudar a forma dos dados? Se sim, por quê?
+
+
+
+# Seção de Gráficos Bivariados
+```{r echo=FALSE, Bivariate_Plots}
+
+```
+
+# Análise Bivariada
+
+### Discuta sobre alguns dos relacionamentos observados nesta parte da investigação. Como os atributos de interesse variaram no conjunto de dados?
+
+### Você observou algum relacionamento interessante entre os outros atributos (os que não são de interesse)?
+
+### Qual foi o relacionamento mais forte encontrado?
+
+
+
+
+# Seção de Gráficos Multivariados
+
+```{r echo=FALSE, Multivariate_Plots}
+
+```
+
+# Análise Multivariada
+
+### Discuta sobre os relacionamentos observados nesta parte da investigação. Quais atributos que fortaleceram os demais na observação das variáveis de interesse?
+
+### Interações surpreendentes e/ou interessantes foram encontradas entre os atributos?
+
+### OPCIONAL: Modelos foram criados usando este conjunto de dados? Discuta sobre os pontos fortes e as limitações do seu modelo.
+
+------
+
+# Gráficos Finais e Sumário
+
+### Primeiro Gráfico
+```{r echo=FALSE, Plot_One}
+
+```
+
+### Descrição do Primeiro Gráfico
+
+
+### Segundo Gráfico
+```{r echo=FALSE, Plot_Two}
+
+```
+
+### Descrição do Segundo Gráfico
+
+
+### Terceiro Gráfico
+```{r echo=FALSE, Plot_Three}
+
+```
+
+### Descrição do Terceiro Gráfico
+
+------
+
+# Reflexão
+
+

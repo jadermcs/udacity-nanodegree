@@ -27,46 +27,63 @@ library(ggplot2)
 ```
 
 ## Introdução
-Essa análise irá explorar um conjunto de dados de vinhos tintos [Cortez et al., 2009], originalmente construído para modelagem da qualidade do vinho refletida por aspectos químicos de cada bebida. O conjunto de dados tem 1599 registros com 11 variáveis + qualidade do vinho (de 0 a 10).
+Essa análise irá explorar um conjunto de dados de vinhos tintos [Cortez et al., 2009], originalmente construído para modelagem da qualidade do vinho refletida por aspectos químicos de cada bebida. O conjunto de dados tem 1599 registros com 11 variáveis (de aspecto químico) + qualidade do vinho (de 0 a 10). Obtive a ajuda de um amigo formado em química para me guiar em possíveis aspectos quimícos que podem gerar um gosto desagradável no vinho, e sob essas hipoteses guiarei minha analise.
 
 ```{r echo=FALSE, rows.print=3}
 winecsv <- read.csv("wineQualityReds.csv")
 str(winecsv)
 ```
-
+```{r echo=FALSE, error=FALSE, message=FALSE}
+ggplot(data = winecsv, aes(x=quality)) +
+  #geom_histogram()
+  geom_bar(stat="count") +
+  scale_x_continuous(breaks=seq(1, 10, by=1))
+```
 
 ```{r echo=FALSE, error=FALSE, message=FALSE}
 ggplot(data = winecsv, aes(x=quality)) +
-  geom_histogram()
+  #geom_histogram()
+  geom_bar(stat="count") +
+  scale_x_continuous(breaks=seq(1, 10, by=1)) +
+  scale_y_log10(breaks=c(1,25,50,100,200, 400, 800)) +
+  labs(y="log10(count)")
 ```
 
-```{r echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
-ggplot(data = winecsv, aes(x=quality)) +
-  geom_histogram() +
-  scale_y_log10()
-```
+Embora as notas para qualidade do vinho possam ir de 0 a 10 podemos ver que a imensa maioria dos vinhos estão avaliados com notas medianas, 5 e 6, o que torna essa variavel, qualidade, possivelmente não interessante para analise de regressão.
 
-Embora as notas para qualidade do vinho possam ir de 0 a 10 podemos ver que a imensa maioria dos vinhos estão avaliados com notas medianas, 5 e 6, o que torna essa variavel, qualidade, possivelmente não interessante para analise de regressão, porém posteriormente iremos visualizar algumas regressões para confirmar isso.
+Começarei guiando minha analise por açucar residual, pH e acidez volátil.
 
 ```{r echo=FALSE, message=FALSE}
 ggplot(data=winecsv, aes(x=pH)) +
-  geom_histogram()
+  geom_histogram(aes(y=..density..), bins = 100) +
+  geom_density(alpha=.3)
 ```
 
-Para a variável pH temos uma distribuição normal e poucos outliers, futuramente iremos ver se esses outliers são vinhos piores ou melhores.
+Para a variável pH temos uma distribuição normal (bem irregular) e alguns outliers, futuramente iremos ver se outliers são vinhos piores ou melhores.
 
 ```{r echo=FALSE, message=FALSE}
 ggplot(data=winecsv, aes(x=volatile.acidity)) +
-  geom_histogram(bins = 70)
+  geom_histogram(aes(y=..density..), bins = 60) +
+  geom_density(alpha=.3)
 ```
 
-Para a quantidade de acido acético presente no vinho, podemos ver uma distribuição binormal, dada por vinhos suaves e secos presentes no data set.
+Para a quantidade de acido acético presente no vinho, podemos ver uma distribuição binormal, dada possivelmente por vinhos suaves e secos presentes no data set, porém como os dados não apresentam tal informação não poderei fazer uma exploração detalhada sob caracteristicas de vinhos secos e suaves.
 
 ```{r echo=FALSE, message=FALSE}
 ggplot(data=winecsv, aes(x=residual.sugar)) +
-  geom_histogram(bins = 100) + 
-  xlim(c(0,8))
+  geom_histogram(aes(y=..density..), bins = 100) +
+  geom_density(alpha=.3)
 ```
+```{r echo=FALSE, message=FALSE}
+ggplot(data=winecsv, aes(x=residual.sugar)) +
+  geom_histogram(aes(y=..density..), bins = 100) +
+  geom_density(alpha=.3) +
+  scale_y_sqrt()+
+  scale_x_continuous(breaks=seq(0,16,by=1))
+```
+Aqui vemos uma cauda pesada para o açucar residual, nos indicando que existem vinhos que são muito mais doces que a média, também pontos dispersos nessa cauda. Porém a grande maioria dos vinhos se encontram com um açucar residual por volta de 2,2.
+
+
 
 
 # IDEAIS
