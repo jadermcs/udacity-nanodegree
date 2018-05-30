@@ -126,18 +126,40 @@ de contribuições novembro de 2012.
 # Ideias Adicionais
 Como já citado, as tags não estão muito bem padronizadas quanto a classificações
 , é necessário que se crie uma norma de classificação para os endereços do
-Brasil e especificamento do Distrito Federal que foje um pouco do padrão
+Brasil e especificamento do Distrito Federal, que foje um pouco do padrão
 nacional. É possivel ainda fazer diversas melhorias através de dicionários e
 funções ad-hoc para uma maior normalização/padronização dos dados.
 
 Também há muito informação desnecessária, descrições muito detalhadas no campo
-descrição, redundância de informação e etc. Fazendo com que  os dados terem
-ocupem muito mais espaço de armazenamento.
+descrição, redundância de informação e etc, fazendo com que os dados ocupem
+muito mais espaço de armazenamento.
 
 Podemos ver também que apenas um percentual pequeno da população contribui com
 os dados, de tal forma que regiões mais novas ou mais pobres são pouco mapeadas,
 se houvesse uma gamificação quanto a contribuição, talvez mais usuários
 contribuiriam.
+
+# Reflexões
+Na seção anterior apontei duas ideias que considero importantes quanto as
+melhorias possiveis ao OSM, a normalização da informação e a gamificação como
+incentivo a contribuição, irei discutir aqui beneficios e problemas esperados:
+
+- Normalização
+    - Beneficios
+        - Diminuição no custo de armazenamento
+        - Dados mais informativos e consistentes
+        - Maior facilidade para analises computacionais
+    - Problemas Esperados
+        - Alto custo de tempo e recursos para normalização da grande quantidade
+de dados além das tarefas usuais da organização
+
+- Gamificação
+    - Beneficios
+        - Incentivo a usuários contribuírem com o mapa
+        - Maior visibilidade para contribuidores
+    - Problemas Esperados
+        - Inserção de dados falsos ou de má qualidade apenas para ganhar pontos
+        - Possivel sobrecarga da organização para manter tal sistema gamificado
 
 ![Entorno, Brasília, Distrito Federal - Brasil](map.png)
 

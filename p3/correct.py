@@ -1,20 +1,31 @@
+"""Corrige ceps (postcode) do banco mongo para o formato canonico XX.XXX-XX
+"""
 from pymongo import MongoClient
 
-
 def cepformat(cep):
+    """Corrige o formato do cep
+
+    Args:
+        cep (string): cep a ser corrigido.
+
+    Returns:
+        param1 (string): cep reformatado, corrigido.
+    """
     # reformata os ceps para o formato dos correios XX.XXX-XXX
-    d = cep.replace('.', '').replace('-', '')
-    return "{}.{}-{}".format(d[:2], d[2:5], d[5:])
+    newcep = cep.replace('.', '').replace('-', '')
+    return "{}.{}-{}".format(newcep[:2], newcep[2:5], newcep[5:])
 
 def reformat():
+    """Conecta ao mongo e reformata todos os ceps.
+    """
     conn = MongoClient()
-    db = conn.osm
+    database = conn.osm
     # percorre os documentos em busca dos que tenham codigo postal para
     # reformatar
-    for x in db.mapbsb.find({'address.postcode': {'$exists': True}}):
-        newcep = cepformat(x['address']['postcode'])
-        db.mapbsb.update_one({'_id': x['_id']},
-                             {'$set': {'address.postcode': newcep}})
+    for elem in database.mapbsb.find({'address.postcode': {'$exists': True}}):
+        newcep = cepformat(elem['address']['postcode'])
+        database.mapbsb.update_one({'_id': elem['_id']},
+                                   {'$set': {'address.postcode': newcep}})
 
 if __name__ == "__main__":
     reformat()
