@@ -116,7 +116,7 @@ vista que dos 143 registros apenas 18 são "poi", por isso dei
 preferência aqueles que permitiam balancear o peso das classes, para minha
 surpresa a regressão logistica (junto ao GradientBoost) teve bons resultados
 sendo escolhida para o fine tuning final. Na etapa final (tuning) me atentei a
-fazer um validação razoavel, de forma que não fossem tantos "folds" podendo
+fazer uma validação razoavel, de forma que não fossem tantos "folds" podendo
 demorar muito e nem poucos de forma que o modelo possa sofrer de overfitting,
 consultando diversos posts do forum e atraves de testes empiricos cheguei em um
 modelo balanceado de validação cruzada. No passo seguinte busquei fazer o tuning
@@ -128,12 +128,18 @@ poucos parametros (comparado a modelos de arvore por exemplo) decidi explorar
 uma vasta gama de valores no começo porém conforme ia modificando os dados vi
 que não seria necessário reduzindo meu conjunto de parametros a um menor.
 
-Na validação, que é a analise da capacidade de generalização do algoritmo,
-buscamos achar uma combinação de modelo e parametros que não serão bons apenas
-para prever nossos dados de treino, mas qualquer dado novo gerado pelo fenomeno
-estudado. Coloquei a principio como métrica o f1-score, porém vi que o mesmo
-não tinha bons resultados e voltei ao default. Aqui o SelectKBest, através do
-GridSearchCV escolheu todas as features menos a criada 'total_stock_value'/'salary'.
+Durante a fase de tuning de parametros é possivel que nosso modelo se ajuste
+muito bem para os casos de treino e teste, porém não queremos apenas isso,
+queremos que pra novos casos a serem avaliados nosso modelo também desempenhe
+bem, com base em alguma metrica de erro, surge
+então a validação, que é a analise da capacidade de generalização do algoritmo,
+ela irá avaliar se nosso modelo não sofreu de overfitting, tendo boa performance
+apenas para os dados amostrados, mas sim se consegue a partir de novos dados
+manter um bom desempenho. Aqui usando o GridSearchCV realizamos a busca por
+parametros que mais generalizam. Coloquei a principio como métrica o f1-score,
+porém vi que o mesmo não tinha bons resultados e voltei ao default. Aqui o
+SelectKBest, através do GridSearchCV escolheu todas as features menos a criada
+'total_stock_value'/'salary'.
 
 # Conclusão
 Obtive os seguintes resultados para a avaliação do GradientBoostClassifier e do
