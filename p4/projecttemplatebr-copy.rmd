@@ -40,6 +40,12 @@ acidity <- melt(acidity)
 ```
 
 # Seção de Gráficos Univariados
+```{r echo=FALSE, error=FALSE, message=FALSE}
+ggplot(data = winecsv, aes(x=quality)) +
+  geom_bar(stat="count") +
+  scale_x_continuous(breaks=seq(1, 10, by=1))
+```
+
 ```{r echo=FALSE, Univariate_Plots}
 ggplot(acidity, aes(x=value, fill=variable)) +
   geom_density()
