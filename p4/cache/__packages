@@ -1,0 +1,9 @@
+base
+ggplot2
+gridExtra
+lattice
+MASS
+memisc
+RColorBrewer
+knitr
+GGally
