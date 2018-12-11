@@ -33,8 +33,7 @@ EDA pode nos trazer insights, que podem nos levar a novas questões, e eventualm
 
 ## Introdução
 
-Essa análise irá explorar um conjunto de dados de vinhos tintos [Cortez et al., 2009], originalmente construído para modelagem da qualidade do vinho refletida por aspectos químicos de cada bebida. O conjunto de dados tem 1599 registros com 11 variáveis (de aspecto químico) + qualidade do vinho (de 0 a 10) reportada por profissionais da área. Obtive a ajuda de um amigo formado em química para me guiar em possíveis aspectos quimícos que podem gerar um gosto desagradável no vinho, e sob essas hipoteses guiarei minha analise.
-
+Essa análise irá explorar um conjunto de dados de vinhos tintos [Cortez et al., 2009], originalmente construído para modelagem da qualidade do vinho refletida por aspectos químicos de cada bebida. Obtive a ajuda de um amigo formado em química para me guiar em possíveis aspectos quimícos que podem gerar um gosto desagradável no vinho, e sob essas hipoteses guiarei minha analise.
 
 
 ```{r global_options, include = FALSE}
@@ -290,136 +289,91 @@ Para os vinhos ruins está uma cauda pesada com centro a esquerda e esparsa, ja 
 
 ## Sulfatos
 
-Next up is sulphates, added to wines as an antimicrobial and antioxidant.
+Sulfatos são adicionados ao vinho para controlar aspectos na fabricação, não interferindo muito no produto final.
 
 ```{r}
 hist_plot(wine, 'sulphates', .01)
 ```
 
-The distribution has a long right tail, so - again - log-transforming the data might help fix this issue:
+Com cauda pesada novamente iremos aplicar uma transformação log.
 
 ```{r}
 hist_plot(wine, 'sulphates', .01) +
   scale_x_log10(breaks = seq(min(wine$sulphates), .8, .05))
 ```
 
-Now it looks more normally distributed, with a pronounced peak at around 0.53. The initial histogram exposes a few outliers that have more than 1 gram of sulphates per liter - let's look at those:
+Agora temos um histograma mais centralizado com varios picos e alguns outliers, acredito que tais picos sejam dados pelo arrendondamento já que estamos em um intervalo pequeno.
 
-```{r}
-subset(wine, sulphates > 1)
-```
-
-Those wines did pretty well, scoring 6 and 7.
-
-As usual, we'll now examine concentration of sulphates in poor and excellent wines:
+Novamente analisando em relação a vinhos bons e ruins.
 
 ```{r}
 h1_sul <- hist_plot(subset(wine, quality <= 4), 'sulphates', .05) +
-  ggtitle('Sulphates in poor wines')
+  ggtitle('Vinhos ruins')
 
 h2_sul <- hist_plot(subset(wine, quality >= 7), 'sulphates', .05) +
-  ggtitle('Sulphates in excellent wines')
+  ggtitle('Vinhos bons')
 
 grid.arrange(h1_sul, h2_sul)
 ```
 
-The bulk of poor wine samples seems to be more tightly packed, whereas excellent wine samples look more spread out, peaking at 0.45 and 0.4, respectively.
+Vinhos ruins estão com outliers com valores bem altos, talvez isso colabore na pessima nota.
 
-## Fixed and volatile acidity
+## Acidez fixada e volatil
 
-In this subsection, we'll be looking at concentration of tartaric and acetic acids. The latter, at too high levels, can make a wine taste like vinegar.
+Aqui analisamos a acidez volatil, em excesso pode deixar o vinho com gosto de vinagre.
 
 ```{r}
 hist_plot(wine, 'fixed.acidity', .25)
 ```
 
-We might benefit from a more granular histogram here:
-
-```{r}
-hist_plot(wine, 'fixed.acidity', .25) +
-  scale_x_continuous(breaks = seq(min(wine$fixed.acidity), 10.3, .5)) +
-  coord_cartesian(xlim = c(min(wine$fixed.acidity), 10.3))
-```
-
-Now it's easier to see the peak value, which is around 6.5.
-
-In the initial histogram, some outliers are immediately obvious. We'll examine a few of them more closely:
-
-```{r}
-subset(wine, fixed.acidity > 10)
-```
-
-Almost half of those are poor wine samples and the rest are of medium quality (5 and 6). To check if wine quality drops as tartaric acid concentration increases, we might want to compare this concentration in poor and excellent wines, so that we can draw some tentative conclusion:
+Para essa distribuição temos varios outliers de valores bem altos, acredito que esses vinhos tenham recebido nota ruim, valor analisar:
 
 ```{r}
 h1_fa <- hist_plot(subset(wine, quality <= 4), 'fixed.acidity', .5) +
   scale_x_continuous(breaks = seq(min(wine$fixed.acidity), max(wine$fixed.acidity), .5)) +
-  ggtitle('Tartaric acid in poor wines')
+  ggtitle('Vinhos ruins')
 
 h2_fa <- hist_plot(subset(wine, quality >= 7), 'fixed.acidity', .5) +
   scale_x_continuous(breaks = seq(min(wine$fixed.acidity), max(wine$fixed.acidity), .5)) +
-  ggtitle('Tartaric acid in excellent wines')
+  ggtitle('Vinhos bons')
 
 grid.arrange(h1_fa, h2_fa)
 ```
 
-Both the peak values seem equal to 7, although the distribution of poor wine samples is more right-skewed, whereas that of excellent wine samples is left-skewed.
+Pelo gráfico podemos ver que isso não é um fator determinante na qualidade do vinho, sendo as distribuições pertencendo ao mesmo intervalo.
 
-We'll analyze acetic acid the same way as we did tartaric acid.
+Agora para acidez volatil:
 
 ```{r}
 hist_plot(wine, 'volatile.acidity', .01) +
   scale_x_continuous(breaks = seq(min(wine$volatile.acidity), max(wine$volatile.acidity), .1))
 ```
 
-This distribution has a long right tail, so we can proceed in two ways: just chop the tail off by applying the limit to the X axis, or log-transform our data. Let's try to do both for a change and see what results we end up with.
-
-```{r}
-h1_cut <- hist_plot(wine, 'volatile.acidity', .01) +
-  scale_x_continuous(breaks = seq(min(wine$volatile.acidity), .53, .05)) +
-  coord_cartesian(xlim = c(min(wine$volatile.acidity), .53)) +
-  ggtitle('Acetic acid (tail cut-off)')
-
-h2_log <- hist_plot(wine, 'volatile.acidity', .05) +
-  scale_x_log10(breaks = seq(min(wine$volatile.acidity), .68, .1)) +
-  ggtitle('Acetic acid (log10 transform)')
-
-grid.arrange(h1_cut, h2_log)
-```
-
-We get almost the same peak value of about 0.28, although it's a bit off to the left (by circa 0.01) in case of log10 transform.
-
-Let's now take a closer look at some of the outliers that contain over 0.9 grams of acetic acid per liter:
-
-```{r}
-subset(wine, volatile.acidity > .9)
-```
-
-We can see those are poor to medium wines, which seems to be in line with the above statement from the dataset description that claims that higher concentrations of this acid lead to a pronounced taste of vinegar in a wine sample. Of course, to draw any conclusions, a more in-depth analysis is needed, which we'll undertake in the next sections. For now, we'll try to find out what concentrations of acetic acid are typical of poor and excellent wines.
+A distribuição está bem inregular e acredito que novamente seja pelo truncamento, agora as distribuições para vinhos bons e ruins.
 
 ```{r}
 h1_va <- hist_plot(subset(wine, quality <= 4), 'volatile.acidity', .06) +
   scale_x_continuous(breaks = seq(min(wine$volatile.acidity), max(wine$volatile.acidity), .1)) +
-  ggtitle('Acetic acid in poor wines')
+  ggtitle('Vinhos ruins')
 
 h2_va <- hist_plot(subset(wine, quality >= 7), 'volatile.acidity', .06) +
   scale_x_continuous(breaks = seq(min(wine$volatile.acidity), max(wine$volatile.acidity), .1)) +
-  ggtitle('Acetic acid in excellent wines')
+  ggtitle('Vinhos bons')
 
 grid.arrange(h1_va, h2_va)
 ```
 
-Peak values are almost equal, although the figure seems to be a bit greater for poor wines (0.28 vs 0.26). Moreover, the distribution of poor wines has a longer right tail that extends beyond higher values than that of excellent wines.
+A distribuição para vinhos bons parece que foi deslizada a esqueda e menos espaçada
 
-## Free, bound, and total (free + bound) sulfur dioxide
+## Dioxido de enxofre
 
-Here, we'll be exploring SO2 levels in our wine samples, starting off with free SO2.
+Comecemos a analise do SO2 pelo enxofre livre:
 
 ```{r}
 hist_plot(wine, 'free.sulfur.dioxide', 2)
 ```
 
-Almost all the wine samples sit under the value of 100, so we might want to zoom in a bit:
+Quase todas estão a menos de 60, vamos dar um zoom nisso.
 
 ```{r}
 hist_plot(wine, 'free.sulfur.dioxide', 2) +
@@ -427,34 +381,26 @@ hist_plot(wine, 'free.sulfur.dioxide', 2) +
   coord_cartesian(xlim = c(min(wine$free.sulfur.dioxide), 100))
 ```
 
-This distribution seems to peak at a value close to 30.
+A distribuição tem um pico proximo do valor 7. 
 
-Let's also examine the outlier situated far off to the right in the first histogram:
-
-```{r}
-subset(wine, free.sulfur.dioxide > 200)
-```
-
-Turns out it's quite a low-quality wine sample.
-
-Time to compare how much free SO2 is contained in poor and excellent wines:
+Agora comparando para vinhos bons e ruins:
 
 ```{r}
 h1_fsd <- hist_plot(subset(wine, quality <= 4), 'free.sulfur.dioxide', 5) +
   scale_x_continuous(breaks = seq(min(wine$free.sulfur.dioxide), 82, 5)) +
   coord_cartesian(xlim = c(min(wine$free.sulfur.dioxide), 78)) +
-  ggtitle('Free SO2 in poor wines')
+  ggtitle('Vinhos ruins')
 
 h2_fsd <- hist_plot(subset(wine, quality >= 7), 'free.sulfur.dioxide', 5) +
   scale_x_continuous(breaks = seq(min(wine$free.sulfur.dioxide), max(wine$free.sulfur.dioxide), 5)) +
-  ggtitle('Free SO2 in excellent wines')
+  ggtitle('Vinhos bons')
 
 grid.arrange(h1_fsd, h2_fsd)
 ```
 
-Looks like lower levels of free SO2 are more typical of poor wines, with the peak at 2 and the bulk of the data sitting between 2 and 37. For excellent wines, most wine samples fall in the 27-47 range, with the peak at 29. One more interesting thing: the poor wines distribution here is the only one so far that looks like an exponential one, which means higher levels of free SO2 are much more rarely observed in poor wines than low ones.
+Para os vinhos ruins vemos uma distribuição mais larga, porem os vinhos bons estão contidos nesse intervalo.
 
-Since total SO2 = free SO2 + bound SO2, we can create a new variable for bound SO2 and analyze it separately, same as we did with free SO2.
+Vamos criar a variavel bound, que é o enxofre total menos o enxofre livre:
 
 ```{r}
 # we just subtract free SO2 from total SO2
@@ -462,179 +408,115 @@ Since total SO2 = free SO2 + bound SO2, we can create a new variable for bound S
 wine$bound.sulfur.dioxide <- wine$total.sulfur.dioxide - wine$free.sulfur.dioxide
 ```
 
-Let's see some high-level information about our new variable:
-
 ```{r}
 summary(wine$bound.sulfur.dioxide)
 ```
 
-Now we can build a few histograms to better understand how it behaves.
+Agora visualizamos alguns histogramas para ver como se comporta.
 
 ```{r}
 hist_plot(wine, 'bound.sulfur.dioxide', 4)
 ```
 
-We can clearly see an outlier containing over 300 mg/l of bound SO2 - let's go microscopic on it:
+Temos alguns outliers vamos ver mais proximo.
 
 ```{r}
-subset(wine, bound.sulfur.dioxide > 300)
+subset(wine, bound.sulfur.dioxide > 200)
 ```
 
-Same as with free SO2 above, it's also a low-quality wine, with a score of 3.
+Temos aqui vinhos de boa qualidade.
 
-Now we'll apply some breaks and limits to the X axis to be able to see separate values more clearly:
-
-```{r}
-hist_plot(wine, 'bound.sulfur.dioxide', 4) +
-  scale_x_continuous(breaks = seq(min(wine$bound.sulfur.dioxide), 196, 8)) +
-  coord_cartesian(xlim = c(min(wine$bound.sulfur.dioxide), 200))
-```
-
-The peak's become more discernible - it's about 82.
-
-Moving on to comparing the levels of bound SO2 in poor and excellent wines.
+Comparando bons com ruins para essa variável:
 
 ```{r}
 hist_plot(subset(wine, quality <= 4), 'bound.sulfur.dioxide', 8) +
   scale_x_continuous(breaks = seq(min(wine$bound.sulfur.dioxide), 196, 8)) +
   coord_cartesian(xlim = c(min(wine$bound.sulfur.dioxide), 200)) +
-  ggtitle('Bound SO2 in poor wines')
+  ggtitle('Vinhos ruins')
 ```
 
 ```{r}
 hist_plot(subset(wine, quality >= 7), 'bound.sulfur.dioxide', 8) +
   scale_x_continuous(breaks = seq(min(wine$bound.sulfur.dioxide), max(wine$bound.sulfur.dioxide), 8)) +
-  ggtitle('Bound SO2 in excellent wines')
+  ggtitle('Vinhos bons')
 ```
 
-```{r}
-h1_bsd <- hist_plot(subset(wine, quality <= 4), 'bound.sulfur.dioxide', 8) +
-  scale_x_continuous(breaks = seq(min(wine$bound.sulfur.dioxide), 196, 8)) +
-  coord_cartesian(xlim = c(min(wine$bound.sulfur.dioxide), 200)) +
-  ggtitle('Bound SO2 in poor wines')
+Vinhos bons tem um pico muito maior e outliers maiores também.
 
-h2_bsd <- hist_plot(subset(wine, quality >= 7), 'bound.sulfur.dioxide', 8) +
-  scale_x_continuous(breaks = seq(min(wine$bound.sulfur.dioxide), max(wine$bound.sulfur.dioxide), 8)) +
-  ggtitle('Bound SO2 in excellent wines')
-
-grid.arrange(h1_bsd, h2_bsd)
-```
-
-The peaks for the poor wines and excellent wines distributions are about 104 and 76, respectively. The bulk of the poor wine samples falls in a wider range between 44 and 168, whereas it's just between 56 and 112 for excellent wines. Based only on this quick visual comparison, we can tentatively say that excellent wines tend to contain less bound SO2 than poor wines do.
-
-The last to be analyzed in this subsection is the total level of SO2, which, I assume, must strongly correlate with both the level of free SO2 and the level of bound SO2 since it's just the sum of the two. Let's see if the total SO2 histograms we build are very different from what we had for free and bound SO2.
+Agora analisando a quantidade total de enxofre:
 
 ```{r}
 hist_plot(wine, 'total.sulfur.dioxide', 4)
 ```
 
-This histogram also shows an outlier with a pretty high total level of SO2. I believe it's the same wine sample that we looked at above, when dealing with either free or bound SO2, but let's check it to be sure:
+Esse histograma mostra 2 pontos de outlier, vamos dar uma olhada neles.
 
 ```{r}
-subset(wine, total.sulfur.dioxide > 400)
+subset(wine, total.sulfur.dioxide > 200)
 ```
 
-Indeed, it's the very same low-quality wine sample that we picked out earlier in the analysis.
+são os mesmos vinhos de boa qualidade que obtivemos para o enxofre ligado.
 
-Same as with free and bound SO2, let's build a more granular histogram to see more clearly how the values are distributed:
-
-```{r}
-hist_plot(wine, 'total.sulfur.dioxide', 4) +
-  scale_x_continuous(breaks = seq(min(wine$total.sulfur.dioxide), 249, 10)) +
-  coord_cartesian(xlim = c(min(wine$total.sulfur.dioxide), 250))
-```
-
-Judging by the histogram, the mode of this distribution is somewhere near 114.
-
-What's left for us is to explore the total levels of SO2 across poor and excellent wines:
+Agora o comparativo das distribuições para vinhos bons e ruins.
 
 ```{r}
 h1_tsd <- hist_plot(subset(wine, quality <= 4), 'total.sulfur.dioxide', 10) +
   scale_x_continuous(breaks = seq(min(wine$total.sulfur.dioxide), 249, 10)) +
   coord_cartesian(xlim = c(min(wine$total.sulfur.dioxide), 250)) +
-  ggtitle('Total SO2 in poor wines')
+  ggtitle('Vinhos ruin')
 
 h2_tsd <- hist_plot(subset(wine, quality >= 7), 'total.sulfur.dioxide', 10) +
   scale_x_continuous(breaks = seq(min(wine$total.sulfur.dioxide), max(wine$total.sulfur.dioxide), 10)) +
-  ggtitle('Total SO2 in excellent wines')
+  ggtitle('Vinhos bons')
 
 grid.arrange(h1_tsd, h2_tsd)
 ```
 
 The poor wines histogram peaks at 109 and then at 189, whereas the excellent wines histogram shows two distinct peaks situated fairly close to each other - at 99 and 119. Also, poor wine samples are more spread out across the X axis, and the poor wines distribution seems to have a left tail.
 
-# Univariate Analysis
+# Análise Univariada
 
-### What is the structure of your dataset?
+### Qual é a estrutura do conjunto de dados?
 
-The dataset contains 4898 wine samples with 11 attributes (fixed acidity, volatile acidity, citric acid, residual sugar, chlorides, free sulfur dioxide, total sulfur dioxide, density, pH, sulphates, alcohol; I'm not counting the X variable here, since, like I said above, it's just a duplicate of the index, so I dropped it from the dataset before going on with the analysis) and a final grade each sample received from the professional wine judges based on those attributes.
+O conjunto de dados tem 1599 registros com 11 variáveis (de aspecto químico) sendo elas fixed acidity, volatile acidity, citric acid, residual sugar, chlorides, free sulfur dioxide, total sulfur dioxide, density, pH, sulphates e alcohol + qualidade do vinho (de 0 a 10) reportada por profissionais da área.
 
-### What is/are the main feature(s) of interest in your dataset?
+### Quais são os principais atributos de interesse deste conjunto de dados?
 
-The main feature is quality, because this whole analysis is driven by the question "what influences the quality of white wine?". In the next two sections, I'm going to focus on exploring the relationships between quality and other features and their combinations.
+O atributo de interesse é a qualidade do vinho dado que tal dataset foi construido com o objetivo de fazer uma analise estatistica sobre quais fatores influenciam na qualidade do vinho.
 
-### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
+### Quais outros atributos você acha que podem lhe auxiliar na investigação destes atributos de interesse?
 
-Based on the univariate analysis I've performed so far, I have a reason to believe features like alcohol content, chlorides, levels of SO2, fixed and volatile acidity might be more or less reliable indicators of wine quality, but it's hard to say anything for sure until bivariate and multivariate analyses are carried out and feature relationships are explored in various ways.
+Pela analise até o momento a maioria dos fatores contribui para a qualidade do vinho, porém pH, enxofre e cloretos me paraceram mais interessante.
 
-### Did you create any new variables from existing variables in the dataset?
+### Você criou novas variáveis a partir dos atributos existentes no conjunto de dados?
 
-Since I had data on both free SO2 and total SO2 in wines, I created a new variable called bound sulfur dioxide (SO2) by subtracting free SO2 from total SO2. I'm yet to analyze this variable closer in the next sections of my analysis, but for now it seems like higher-quality wine samples tend to contain slightly lower levels of bound SO2.
+Criei, na seção de enxofre, criei a variável bound sulfur que é o enxofre total menos o enxofre livre, sendo esse bound o enxofre ligado a outras moleculas no vinho.
 
-### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
+### Dos atributos investigados, distribuições incomuns foram encontradas? Você aplicou operações nos dados para limpá-los, ajustá-los ou mudar a forma dos dados? Se sim, por quê?
 
-I didn't have to clean anything or fill any gaps as this dataset is prepared in such a way that there's no missing data in it.
+Foram encontradas diversas distribuições com outliers e de cauda pesada, os outliers analisei em graficos separadamente e as distribuições de cauda pesada apliquei a função logaritimica tornando minha distribuição normalizada, facilitando a analise
 
-As I mentioned above, at the beginning of my analysis, I got rid of the X variable since it was just a duplicate of the index and didn't help me in any way.
 
-All the remaining features in the dataset seem more or less normally distributed, but some of the distributions are positively skewed: residual sugar, chlorides, sulphates, volatile acidity. I log-transformed (log10) all of them to solve the issue of long tails. In fact, the residual sugar distribution turned out to be bimodal, with peaks at 1.3 and 8.
+# Seção de Gráficos Bivariados
+Nessa seção analisaremos as relações entre as features par a par.
 
-One thing I noticed is that concentration of almost all the substances is given in grams per cubic decimeter (or grams per liter, which is the same thing, and I prefer this notation), with a notable exception of levels of SO2, which are given in milligrams per liter. Further down the road, it might be worthwhile to convert them to grams per liter to see if anything changes. Same story with density, which can later be converted from grams per cubic centimeter to grams per liter to see if that transformation brings anything new and unexpected to the analysis.
-
-# Bivariate Plots Section
-
-In this section, relationships between pairs of features will be examined. One such relationship is correlation, and the quickest way to obtain pairwise correlations for the whole dataset is to use a ggpairs() function from a library called GGally.
-
-```{r fig.height = 12, fig.width = 15, cache = TRUE, cache.path = "cache/", fig.path = "fig/", pairs_plot}
+```{r fig.height = 12, fig.width = 15, cache = TRUE, cache.path = "cache/", fig.path = "fig/", Bivariate_Plots}
 ggpairs(wine)
 ```
 
-We can see a more or less pronounced (I defined the threshold to be abs(0.35)) correlation between the following pairs:
 
-**Positive:**
+Temos uma correlação significativa para a qualidade do vinho apenas para a variável alcool, o que a principio desestimula uma analise mais profunda, porém existem relações entre mais variáveis que por enquanto nos estão ocultas, além de transformações que podem ser feitas tornando as relações lineares.
 
-* quality - alcohol (0.436)
-* total sulfur dioxide - free sulfur dioxide (0.616) - should probably be excluded from further analysis as total SO2 = free SO2 + bound SO2, so high correlation is to be expected here
-* total sulfur dioxide - residual sugar (0.401)
-* density - residual sugar (0.839)
-* density - total sulfur dioxide (0.53)
-* bound sulfur dioxide - total sulfur dioxide (0.922) - should be excluded for the same reason as above
-* bound sulfur dioxide - density (0.504)
-* bound sulfur dioxide - residual sugar (0.345)
+Citando as relações par a par, vemos que algumas variáveis estão bem relacionadas, densidade e acidez fixada, pH e acidez fixada, enxofre ligado e enxofre total e outras não citadas menos relacionadas, variando positivamente e negativamente.
 
-**Negative:**
-
-* bound sulfur dioxide - alcohol (-0.427)
-* pH - fixed acidity (-0.426)
-* alcohol - density (-0.78)
-* alcohol - residual sugar (-0.451)
-* alcohol - total sulfur dioxide (-0.449)
-* alcohol - chlorides (-0.36)
-
-Our main variable, quality, is correlated the most with alcohol (0.436), density (-0.307), bound sulfur dioxide (-0.218), chlorides (-0.21), and volatile acidity (-0.195).
-
-It would make sense to concentrate our efforts on studying the identified correlated pairs more carefully.
-
-## Scatter plots for positively correlated features
+## Scatter plot das correlações positivas
 
 ```{r}
 
-# since we'll be building a lot of similar scatter plots in this section, let's create a function to simplify this process
-
 scatter_plot <- function(x, y) {
   ggplot(data = wine, aes_string(x = x, y = y)) +
-   geom_point(alpha = .25, position = position_jitter(h = 0), color = 'blue', size = 1) +
-   geom_smooth(method = 'lm', color = 'red')
+   geom_point(alpha = .25, position = position_jitter(h = 0), size = 1) +
+   geom_smooth(method = 'lm')
 }
 ```
 ```{r}
@@ -643,7 +525,7 @@ scatter_plot('density', 'residual.sugar') +
                   ylim = c(min(wine$residual.sugar), 25))
 ```
 
-This pair displays the strongest positive correlation in the dataset, as can be clearly seen in the scatter plot above: density tends to grow almost linearly as the level of residual sugar gets higher.
+Esse par apresenta a maior correlação positiva.
 
 ```{r}
 scatter_plot('density', 'total.sulfur.dioxide') +
@@ -657,13 +539,13 @@ scatter_plot('density', 'bound.sulfur.dioxide') +
                   ylim = c(min(wine$bound.sulfur.dioxide), 250))
 ```
 
-These two plots show the second and third most pronounced correlations discovered: density vs bound and total SO2. As bound SO2 is a part of the total SO2, strong correlations were to be expected in both cases, and the plots do support these expectations. One can't help but notice that the two plots look very much alike. It's because correlation figures are very close numerically: 0.53 for density vs total SO2 and 0.504 for density vs bound SO2. Besides, distributions of bound SO2 and total SO2 are also fairly similar.
+Para esses outros dois plots vemos dados bem espalhados, sem nenhuma relação não-linear clara.
 
 ```{r}
 scatter_plot('quality', 'alcohol')
 ```
 
-Here we can also see a positive correlation and therefore a general upward trend: wine quality seems to improve given higher alcohol content. There are lots of exceptions, of course, but the plot doesn't provide the whole picture of what's going on, so we'll need to examine this case more closely further down the road.
+Aqui vemos uma correlação positiva, quanto maior a quantidade de alcool, mais provavel o vinho ter uma nota mais alta.
 
 ```{r}
 scatter_plot('residual.sugar', 'total.sulfur.dioxide') +
@@ -677,9 +559,9 @@ scatter_plot('residual.sugar', 'bound.sulfur.dioxide') +
                   ylim = c(min(wine$bound.sulfur.dioxide), 250))
 ```
 
-These are the scatter plots for the most weakly correlated pairs (given the threshold of abs(0.35)): residual sugar vs total and bound SO2. Like with density plots above, these are also hard to tell apart since the two levels of SO2 are similarly distributed and strongly correlated with each other. The main takeaway from these plots is that sweeter wines tend to contain higher levels of bound and total SO2.
+Esses dois pares tem pouca correlação com entre as variáveis, sendo as distribuições bem concentradas proximo a origem.
 
-## Scatter plots for negatively correlated features
+## Scatter plot relações negativas
 
 ```{r}
 scatter_plot('alcohol', 'density') +
@@ -687,7 +569,7 @@ scatter_plot('alcohol', 'density') +
   scale_x_continuous(breaks = seq(8, 14, .5))
 ```
 
-The scatter plot above shows the most pronounced negative correlation discovered - alcohol vs density: as alcohol content grows, wine density tends to almost linearly decrease.
+Aqui a correlação indica que vinhos de maior densidade apresentam menos alcool e de menor densidade mais alcool.
 
 ```{r}
 scatter_plot('alcohol', 'residual.sugar') +
@@ -695,7 +577,7 @@ scatter_plot('alcohol', 'residual.sugar') +
   scale_x_continuous(breaks = seq(8, 14, .5))
 ```
 
-As can be understood from the slope of the line of best fit, the second strongest negative correlation is much weaker. In fact, it's almost 1.75 weaker than the strongest correlation. To be honest, this one was a surprise for me: after doing some research, I was expecting the concentration of residual sugar and alcohol content to be positively correlated - looks like I couldn't be more wrong!
+Aqui também vemos uma correlação fraca entre alcool e açúcar residual.
 
 ```{r}
 scatter_plot('alcohol', 'total.sulfur.dioxide') +
@@ -709,7 +591,7 @@ scatter_plot('alcohol', 'bound.sulfur.dioxide') +
   scale_x_continuous(breaks = seq(8, 14, .5))
 ```
 
-The two plots above display the relationships between alcohol and levels of bound and total SO2 and seem to reinforce an earlier discovered positive correlation between quality and alcohol content. The intuition behind this is as follows: since higher alcohol content tends to be found more often in higher-quality wines and a high level of any SO2 is bad for a wine (as it will show in the nose and taste of this wine), it may be assumed that wines containing more alcohol (and therefore often having a higher grade) tend to have lower levels of bound and total SO2, which is clearly the case here.
+Aqui a indicios de uma correlação não muito forte entre enxofre ligado e o inverso da quantidade de alcool.
 
 ```{r}
 scatter_plot('fixed.acidity', 'pH') +
@@ -723,15 +605,13 @@ scatter_plot('alcohol', 'chlorides') +
   scale_x_continuous(breaks = seq(8, 14, .5))
 ```
 
-The two final plots are for the two most weakly correlated pairs (above the predefined threshold of abs(0.35)): fixed acidity vs pH (-0.426) and alcohol vs chlorides (-0.36). The first plot makes intuitive sense: pH measures how acidic or basic a wine is, 0 being very acidic and 14 being very basic. As fixed acidity of a wine increases, its pH level drops accordingly, meaning that this particular wine is closer to being acidic on the pH scale. The second plot was in line with my expectations: I assumed not many people would enjoy drinking a wine with a high level of chlorides, as it would be too salty, if that's a suitable description for a wine. Therefore, wines featuring higher alcohol content (and having a higher grade) would need to contain little salt in them to be judged as being high-quality. This assumption seems to hold true in this case, if the plot is to be believed.
+Temos aqui duas correlação inversamente fortes, ph e acidez fixada, alcool e cloros.
 
-## Box plots for quality
+## Box plots de qualidade
 
-In this subsection, we'll look at how quality varies with the rest of the features and try to find out if any feature allows definitely telling a good wine from a bad one.
+Aqui investigamos as distribuições da relação entre notas e aspecto quimico:
 
 ```{r}
-# creating another function for building box plots
-# I'll also need to apply cut_width() to quality since it's treated as a continuous variable and the plot would display just one long box instead of 7, one for each distinct value
 
 box_plot <- function(y) {
   ggplot(data = wine, aes_string(x = 'quality', y = y)) +
@@ -748,7 +628,7 @@ sum_by_qual <- function(x) {
 }
 ```
 
-### Quality vs fixed acidity
+### Qualidade e acidez fixada
 
 ```{r}
 box_plot('fixed.acidity')
@@ -758,9 +638,8 @@ box_plot('fixed.acidity')
 sum_by_qual(wine$fixed.acidity)
 ```
 
-Best wines in the dataset have the highest minimum fixed acidity (6.6) and one of the highest medians, along with the worst wines. At the same time, wine samples rated 8 or 9 have the two lowest maximum levels of fixed acidity - 8.2 and 9.1.
 
-### Quality vs volatile acidity
+### Qualidade e acidez volatil
 
 ```{r}
 box_plot('volatile.acidity')
@@ -770,9 +649,8 @@ box_plot('volatile.acidity')
 sum_by_qual(wine$volatile.acidity)
 ```
 
-This box plot shows something of a wave-like pattern in terms of median volatile acidity: it starts growing, reaches its peak, then hits the bottom at 6 and 7, and grows again towards the best wine samples. One thing to note here is that the best wine samples have the highest minimum (0.24) and the lowest maximum (0.36) values of volatile acidity.
 
-### Quality vs citric acid
+### Qualidade e acidez citrica
 
 ```{r}
 box_plot('citric.acid')
@@ -782,9 +660,8 @@ box_plot('citric.acid')
 sum_by_qual(wine$citric.acid)
 ```
 
-Median level of citric acid doesn't seem to vary too much across different grades, except for two spikes at 3 and 9. Best and worst wine samples have the highest minimum (.29 and 0.21, respectively) and lowest maximum values (0.49 and 0.47.respectively) of citric acid concentration.
 
-### Quality vs residual sugar
+### Qualidade e açucar residual
 
 ```{r}
 box_plot('residual.sugar')
@@ -794,9 +671,8 @@ box_plot('residual.sugar')
 sum_by_qual(wine$residual.sugar)
 ```
 
-We can see pronounced fluctuations of the median level of residual sugar across the wine grades, the highest being 7 (grade 5) and the lowest 2.2 (grade 9). However, the sweetest wine sample in the dataset (65.8) has a grade of 6. Once again, the best wine samples have the highest minimum (1.6) and lowest maximum (10.6) levels of residual sugar.
 
-### Quality vs chlorides
+### Qualidade e cloretos
 
 ```{r}
 box_plot('chlorides')
@@ -806,9 +682,7 @@ box_plot('chlorides')
 sum_by_qual(wine$chlorides)
 ```
 
-Wine samples graded 5 have the highest median level of chlorides (0.047), and after that concentration goes downward and hits the bottom at grade 9 - 0.0274. The best wine samples also have the lowest maximum level of chlorides, which is 0.035 - it's at least 3.5 times lower than the runner-up (0.121) and almost 10 times lower than the greatest value in the dataset (0.346).
-
-### Quality vs free sulfur dioxide
+### Qualidade e dioxido de enxofre livre
 
 ```{r}
 box_plot('free.sulfur.dioxide')
@@ -818,9 +692,8 @@ box_plot('free.sulfur.dioxide')
 sum_by_qual(wine$free.sulfur.dioxide)
 ```
 
-Wine samples with the grade of 4 seem to have the lowest median level of free SO2 among all and the second greatest maximum level of free SO2 (138.5), topped only by wine samples graded 3 (max value - 289). Most values seem to be lying below the threshold of 50 (the maximum third quartile), above which SO2 might become evident in the nose and taste of wine and influence its quality.
 
-### Quality vs bound sulfur dioxide
+### Qualidade e dioxido de enxofre ligado
 
 ```{r}
 box_plot('bound.sulfur.dioxide')
@@ -830,9 +703,7 @@ box_plot('bound.sulfur.dioxide')
 sum_by_qual(wine$bound.sulfur.dioxide)
 ```
 
-Median bound SO2 level of better wines tends to lie below 100 (true for grades 6 through 9), which seems to be in line with the negative correlation (about -0.2) we've discovered earlier, and it reaches the lowest value of 82 at grade 9. As was to be expected, the worst wines have the highest maximum level of bound SO2 (331), whereas the best ones have the lowest maximum level, 112 - a 3-time difference!
-
-### Quality vs total sulfur dioxide
+### Qualidade e dioxido de enxofre total
 
 ```{r}
 box_plot('total.sulfur.dioxide')
@@ -842,9 +713,7 @@ box_plot('total.sulfur.dioxide')
 sum_by_qual(wine$total.sulfur.dioxide)
 ```
 
-Since total SO2 = free SO2 + bound SO2, we can observe the same patterns as above, when we analyzed levels of free and bound SO2 in wines. For example, the median level of total SO2 tends to lie below 150 for better wines, with a notable exception of grade 4, which has the lowest median value of all - 117 (heavily influenced by the low level of free SO2 for this grade).
-
-### Quality vs density
+### Qualidade e densidade
 
 ```{r}
 box_plot('density')
@@ -854,9 +723,7 @@ box_plot('density')
 sum_by_qual(wine$density)
 ```
 
-The median density tends to decrease as the quality grows, the only group that breaks this trend is wine samples of grade 5, which have the highest median density of all - 0.9953. This finding seems to be in line with what we've discovered previously: to refresh our memory, quality vs density is the strongest negative correlation for our main variable (-0.307).
-
-### Quality vs pH
+### Qualidade e pH
 
 ```{r}
 box_plot('pH')
@@ -866,9 +733,8 @@ box_plot('pH')
 sum_by_qual(wine$pH)
 ```
 
-Most wine samples lie in the range between 3 and 3.3 on the pH scale, and the median values fit into an even narrower range of 3.15-3.3, varying in a slightly discernible bowl-like fashion: it all starts at 3.215, gradually falls to 3.16, and then starts growing again, peaking at 3.28 (wine samples graded 9).
 
-### Quality vs sulphates
+### Qualidade e sulfatos
 
 ```{r}
 box_plot('sulphates')
@@ -878,9 +744,7 @@ box_plot('sulphates')
 sum_by_qual(wine$sulphates)
 ```
 
-All the median values sit between 0.4 and 0.5, with the worst and best wine samples having the lowest median (as well as maximum) levels of sulphates. Otherwise, there's little change across median pH values.
-
-### Quality vs alcohol
+### Qualidade e alcool
 
 ```{r}
 box_plot('alcohol')
@@ -890,16 +754,11 @@ box_plot('alcohol')
 sum_by_qual(wine$alcohol)
 ```
 
-This box plot reinforces our earlier finding saying that there's a strong positive correlation (0.436) between alcohol content and wine quality - turns out it's especially true for wine samples of higher grades, whereas for lower-quality wines the trend is actually downward - the quality improves with lower alcohol levels. The best wines have the highest median level of alcohol, which seems to be significantly different from some of the other median values of lower-quality wines. It means that in this case the median can be used as a more or less reliable predictor of wine quality: if it's below 12, a wine sample couldn't have scored more than 7. Of course, such conclusions are restricted to our dataset only - the situation might be quite different for the whole population of wines.
+## Plots de densidade
 
-## Color-coded density plots
-
-Let's also build a few color-coded density plots for some of the features that formed the most strongly correlated pairs.
+Fazendo agora um grafico da densidade divididos pela qualidade.
 
 ```{r}
-# function for creating color-coded density plots
-# to be able to color-code our plots by quality, we need to turn quality into a factor variable
-
 density_plot <- function(x, palette) {
   ggplot(data = wine, aes(x = x, color = factor(wine$quality))) +
     geom_density() +
@@ -911,16 +770,14 @@ density_plot <- function(x, palette) {
 density_plot(wine$density, 'Greens') +
   coord_cartesian(xlim = c(min(wine$density), 1.001)) +
   labs(x = 'wine density') +
-  theme_dark() +
-  ggtitle('Density plot for wine density by quality grade')
+  theme_dark()
 ```
 
 ```{r}
 density_plot(wine$alcohol, 'Purples') +
   scale_x_continuous(breaks = seq(8, 14, .5)) +
   labs(x = 'alcohol') +
-  theme_dark() +
-  ggtitle('Density of alcohol content by quality grade')
+  theme_dark()
 ```
 
 ```{r}
