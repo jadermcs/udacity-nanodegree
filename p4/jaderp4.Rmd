@@ -769,75 +769,57 @@ density_plot <- function(x, palette) {
 ```{r}
 density_plot(wine$density, 'Greens') +
   coord_cartesian(xlim = c(min(wine$density), 1.001)) +
-  labs(x = 'wine density') +
-  theme_dark()
+  labs(x = 'wine density')
 ```
 
 ```{r}
-density_plot(wine$alcohol, 'Purples') +
+density_plot(wine$alcohol, 'Reds') +
   scale_x_continuous(breaks = seq(8, 14, .5)) +
-  labs(x = 'alcohol') +
-  theme_dark()
+  labs(x = 'alcohol')
 ```
 
 ```{r}
-density_plot(wine$residual.sugar, 'Reds') +
+density_plot(wine$residual.sugar, 'Blues') +
   coord_cartesian(xlim = c(0, 25)) +
-  labs(x = 'residual sugar') +
-  theme_dark() +
-  ggtitle('Density of residual sugar by quality grade')
+  labs(x = 'residual sugar')
 ```
 
-In all these plots, we can clearly see a bimodal distribution for the best wines. I guess this effect is due to there being very few wine samples with grade 9 in the dataset that take on just several values. Our analysis might have benefited from a greater number of highest-quality wines, as we could've checked whether this pronounced bimodality has to do with insufficient data or there're some other factors at play.
-
-As for the last density plot for residual sugar, the distributions seem quite skewed - and indeed, in the first section of this analysis, we've found out that the residual sugar distribution has a very heavy right tail. Let's now try rebuilding the same density plot, but with the residual sugar variable log-transformed.
+Vemos por esses três gráficos que apenos o de densidade por alcool parece desempenhar alguma correlação com a qualidade do vinho, também é notavel que as distribuições estão bem "deslizadas", a de açucar residual apresentando cauda bem pesada. Sendo assim, iremos aplicar um log transform para avalia-la melhor.
 
 ```{r}
-density_plot(log10(wine$residual.sugar), 'Reds') +
-  labs(x = 'residual sugar') +
-  theme_dark() +
-  ggtitle('Density of log10(residual sugar) by quality grade')
+density_plot(log10(wine$residual.sugar), 'Blues') +
+  labs(x = 'residual sugar')
 ```
 
-Now it becomes obvious this distribution is actually bimodal across all wine grades! Pretty curious finding that I can't explain right away for the lack of the domain knowledge. It might even be a phenomenon peculiar to Portuguese wines - it's really hard to tell without having more data handy.
+Vemos agora que a distribuição se tornou bimodal, e não há uma relação clara entre as notas e as duas variáveis.
 
-# Bivariate Analysis
+# Análise Bivariada
 
-### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
+### Discuta sobre alguns dos relacionamentos observados nesta parte da investigação. Como os atributos de interesse variaram no conjunto de dados?
 
-The strongest positive correlation involving quality is quality vs alcohol (0.436). One particularly interesting thing here is that an upward trend (quality increases as alcohol content grows) holds true only for higher-quality wines, starting from the grade of 6; below this point the trend is actually downward: for wine samples graded 3-5, the lower the alcohol level, the better the wine. The median alcohol value of less than 12 indicates that a wine sample's maximum score is 7, which might help us tell a good wine sample from a poor one.
+A correlação positiva mais significativa com a qualidade foi a quantidade de alcool por densidade, sendo para qualidades maiores que 4 mais significativo. Também atributos quimicos influenciam uns aos outros como esperado.
 
-The most pronounced negative correlation that has to do with our main feature is observed in the pair quality - density (-0.307). The general trend there is a downward one: with each grade, median density decreases a bit, with a notable exception of one group - wine samples of grade 5, which break this trend and actually have the greatest median density of all grades. The exactly same picture can be seen in quality vs bound SO2 (-0.218): grade 5 wines once again break the generally downward trend.
+Para correlação negativa pH e acidez volatil parecem influenciar negativamente, porém como estão no mesmo intervalo é necessário uma analisa mais profunda para saber se não é mera aleatoriedade.
 
-Another interesting pattern was discovered in the pair quality vs volatile acidity (-0.195): median values there seemed to change in a wave-like fashion from one grade to another, going up and down a few times.
+Para os outros fatores aparenta ter quase nenhuma relação significativa, talvez com mais transformadas e composições seja possivel encontrar algo.
 
-One more curious finding was that the residual sugar distribution, which is highly skewed initially, when log-transformed and color-coded by quality, is actually bimodal across all the wine grades, from lowest to highest. As I said above, under the relevant plot, I might be lacking some specialist knowledge to draw the right conclusion based on this fact, or it might just be a peculiarity of Portuguese wines, white ones in particular.
+### Você observou algum relacionamento interessante entre os outros atributos (os que não são de interesse)?
 
-### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+Entre densidade e elementos quimicos (os quais com menor ou maior densidade) há correlações diretas, mas os diferentes atributos com diversas variações não permitem uma analise 1 para 1. Também para o pH e acidos há a correlação que acaba sendo alterada por bases na mistura.
 
-Fun fact: positive correlations were dominated by density (3 occurrences out of 6), negative ones by alcohol, featured even more prominently (5 occurrences out of 6). Therefore, it's only natural that these two features produced the most highly correlated pairs (which I'm talking about in more detail in the subsection below), and density had a part in both of them!
+### Qual foi o relacionamento mais forte encontrado?
 
-Among other things, total SO2 and bound SO2 turned out to be positively correlated with both density and residual sugar. As for the negative correlation, one of the strongest relationships were observed in such pairs as: total SO2 and free SO2 vs alcohol; pH vs fixed acidity; alcohol vs residual sugar and chlorides.
+De forma inesperada densidade se relaciona com a qualidade do vinho, se há uma implicação entre um e outro não consigo formular uma hipotese para isso, dado que o intervalo é relativamente pequeno, não parece haver um fator determinante.
 
-### What was the strongest relationship you found?
+# Seção de Gráficos Multivariados
 
-Surprisingly enough, the two most pronounced correlations didn't involve the main variable, quality, but instead featured density, which seems to be heavily dependent on both residual sugar and alcohol content. In the former case, the correlation is positive and equals 0.839; in the latter case, the features are negatively correlated (-0.78).
-
-# Multivariate Plots Section
-
-In the previous section, we used box plots to see how different variables are distributed across wine grades and scatter plots to discover interesting pairwise relationships between the features. This section allows us to take our analysis one step further by combining the two techniques and examining what relationships the features display (and how these relationships vary) across wine grades.
-
-## Scatter plots faceted by quality
-
-Let's first take a look at a couple of scatter plots for the features that exhibited the strongest correlation, faceted by quality.
+Nesta seção analisaremos multiplas variaveis simultaneamente. Começamos com scatterplots com subplots pelas qualidades dos vinhos. 
 
 ```{r Multivariate_Plots}
-# function for building faceted scatter plots
-
 f_scatter_plot <- function(x, y) {
   ggplot(data = wine, aes_string(x = x, y = y)) +
-    geom_point(color = 'blue', alpha = .2) +
-    geom_smooth(method = 'lm', color = 'red') +
+    geom_point(alpha = .2) +
+    geom_smooth(method = 'lm') +
     facet_wrap(~quality)
 }
 ```
@@ -845,15 +827,13 @@ f_scatter_plot <- function(x, y) {
 ```{r}
 f_scatter_plot('density', 'residual.sugar') +
   coord_cartesian(xlim = c(min(wine$density), 1.001),
-                  ylim = c(min(wine$residual.sugar), 25)) +
-  ggtitle('Density vs residual sugar scatter plot faceted by quality')
+                  ylim = c(min(wine$residual.sugar), 25))
 ```
 
 ```{r}
 f_scatter_plot('density', 'alcohol') +
   coord_cartesian(xlim = c(min(wine$density), 1.001),
-                  ylim = c(7.5, 15)) +
-  ggtitle('Density vs alcohol scatter plot faceted by quality')
+                  ylim = c(7.5, 15))
 ```
 
 Looks like no surprises here. Scatter plots demonstrate the same trends across all wine quality grades: upward for density vs residual sugar and downward for density vs alcohol.
@@ -862,23 +842,20 @@ I wonder what plots would look like for less correlated features.
 
 ```{r}
 f_scatter_plot('alcohol', 'residual.sugar') +
-  coord_cartesian(ylim = c(min(wine$residual.sugar), 25)) +
-  ggtitle('Alcohol vs residual sugar scatter plot faceted by quality')
+  coord_cartesian(ylim = c(min(wine$residual.sugar), 25))
 ```
 
 For the lowest-quality wines, alcohol doesn't seem to be correlated with residual sugar at all, with a negative trend becoming more noticeable towards higher wine grades.
 
 ```{r}
-f_scatter_plot('alcohol', 'total.sulfur.dioxide') +
-  ggtitle('Alcohol vs total SO2 scatter plot faceted by quality')
+f_scatter_plot('alcohol', 'total.sulfur.dioxide')
 ```
 
 Somewhat similar picture here. In case of the worst and best wines, alcohol and total So2 are much less correlated (if correlated at all) as compared with wine samples of other grades, which all display a more prominent downward trend.
 
 ```{r}
 f_scatter_plot('density', 'total.sulfur.dioxide') +
-  coord_cartesian(xlim = c(min(wine$density), 1.001)) +
-  ggtitle('Density vs total SO2 scatter plot faceted by quality')
+  coord_cartesian(xlim = c(min(wine$density), 1.001))
 ```
 
 This time the weakest correlation between the features takes place with the best wine samples. In all other cases, an upward trend is obvious.
