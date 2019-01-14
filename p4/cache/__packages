@@ -1,9 +1,15 @@
 base
+methods
+datasets
+utils
+grDevices
+graphics
+stats
 ggplot2
-gridExtra
+GGally
 lattice
 MASS
 memisc
 RColorBrewer
+gridExtra
 knitr
-GGally

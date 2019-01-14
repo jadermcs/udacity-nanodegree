@@ -1,0 +1,14 @@
+pre{
+  background-color: #ececec !important;
+}
+
+body{
+  background-color: #323232 !important;
+  color: #f6f6f6 !important;
+  font-family: 'Inconsolata', monospace;
+}
+
+h1{
+  font-size: 48px !important;
+  color: #f75940 !important
+}

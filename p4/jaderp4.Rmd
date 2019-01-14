@@ -5,22 +5,11 @@ date: "15 de Dezembro, 2017"
 output:
   html_document:
     df_print: paged
+    css: style.css
 ---
 
 <style>
-  <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet"> 
-  pre{
-    background-color: #ececec !important;
-  }
-  body{
-    background-color: #323232 !important;
-    color: #f6f6f6 !important;
-    font-family: 'Inconsolata', monospace;
-  }
-  h1{
-    font-size: 48px !important;
-    color: #f75940 !important
-  }
+  <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
 </style>
 
 #### O projeto
@@ -815,7 +804,7 @@ De forma inesperada densidade se relaciona com a qualidade do vinho, se há uma 
 
 Nesta seção analisaremos multiplas variaveis simultaneamente. Começamos com scatterplots com subplots pelas qualidades dos vinhos. 
 
-```{r Multivariate_Plots}
+```{r}
 f_scatter_plot <- function(x, y) {
   ggplot(data = wine, aes_string(x = x, y = y)) +
     geom_point(alpha = .2) +
@@ -836,33 +825,31 @@ f_scatter_plot('density', 'alcohol') +
                   ylim = c(7.5, 15))
 ```
 
-Looks like no surprises here. Scatter plots demonstrate the same trends across all wine quality grades: upward for density vs residual sugar and downward for density vs alcohol.
+Como esperado há algumas tendencias aqui, positivas para açucar residual e negativas para alcool.
 
-I wonder what plots would look like for less correlated features.
+Agora vejamos para atributos menos correlatos.
 
 ```{r}
 f_scatter_plot('alcohol', 'residual.sugar') +
   coord_cartesian(ylim = c(min(wine$residual.sugar), 25))
 ```
 
-For the lowest-quality wines, alcohol doesn't seem to be correlated with residual sugar at all, with a negative trend becoming more noticeable towards higher wine grades.
-
 ```{r}
 f_scatter_plot('alcohol', 'total.sulfur.dioxide')
 ```
 
-Somewhat similar picture here. In case of the worst and best wines, alcohol and total So2 are much less correlated (if correlated at all) as compared with wine samples of other grades, which all display a more prominent downward trend.
+Para esses atributos não há uma relação significtiva.
 
 ```{r}
 f_scatter_plot('density', 'total.sulfur.dioxide') +
   coord_cartesian(xlim = c(min(wine$density), 1.001))
 ```
 
-This time the weakest correlation between the features takes place with the best wine samples. In all other cases, an upward trend is obvious.
+Para os vinhos de maior nota parece haver uma correlação negativa porém devida a quantidade escassa de amostras não é claro se há.
 
-## Building a simple linear model
+## Regressão linear
 
-We'll now build a pretty straightforward linear model to see how well it can predict wine quality based on the features we've analyzed.
+Agora construiremos uma regressão linear simples buscando valores numéricos para os coeficientes de correlação de forma combinada.
 
 ```{r}
 m1 <- lm(quality ~ alcohol, data = wine)
@@ -875,90 +862,86 @@ m7 <- update(m6, ~ . + free.sulfur.dioxide)
 mtable(m1, m2, m3, m4, m5, m6, m7, sdigits = 3)
 ```
 
-The variables in this linear model can account for 28% of the variance in the quality of white wine.
+As variaveis selecionadas explicam apenas 30%~ da variação da qualidade dos vinhos.
 
-# Multivariate Analysis
+# Análise Multivariada
 
-### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
+### Discuta sobre os relacionamentos observados nesta parte da investigação. Quais atributos que fortaleceram os demais na observação das variáveis de interesse?
 
-The most prominent correlations we've discovered were in fact so strong that, when faceted by wine quality, the features displayed the same trends across all wine grades: for density vs residual sugar, the trend was always upward, for density vs alcohol always downward.
+Há correlações entre a qualidade discretizada do vinho e as variaveis densidade e alcool, sendo positivas e negativas quanto a outras variáveis.
 
-For other, less correlated features (alcohol vs residual sugar, alcohol vs total SO2, density vstotal SO2), the trend across the wine grades was also the same, with an exception of best or worst wines, or both, whereby features showed little to no correlation whatsoever.
+### Interações surpreendentes e/ou interessantes foram encontradas entre os atributos?
 
-### Were there any interesting or surprising interactions between features?
+Embora minha crença inicial fosse de que os fatores quimicos eram muito determinantes para a analise do vinho apenas com as analises de linearidade não se pode concluir nada muito significativo, mesmo algumas variaveis tendo alguma correlação não é suficiente para explicar significativamente as notas.
 
-Since the correlation between density and residual sugar was quite higher than that of density and alcohol (0.839 vs -0.78), I was epsecially interested to see how residual sugar and alcohol were correlated and expected at least a slightly positive correlation. To my surprise, the correlation turned out to be strongly negative (-0.451, second strongest among negative correlations discovered); in fact, it was so strong that a negative downward trend manifested itself across 6 out 7 wine grades represented in the dataset, except for grade 3, where features showed no correlation at all.
+### OPCIONAL: Modelos foram criados usando este conjunto de dados? Discuta sobre os pontos fortes e as limitações do seu modelo.
 
-### OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
-
-Yes, I did create a linear model that makes a prediction based on 7 features from the dataset. Further increasing the number of features didn't yield any significant improvement, so I stopped at this value. Surprisingly enough, the model explains a mere 28% of the variance in the target variable, which is quality. It seems like wine quality is not well supported by its physico-chemical properties. Two things to note here: first, quality of prediction could be improved with more data (right now, it's less than 5,000 samples); second, there're some other factors at play, so the model might have benefited from addition of such variables as price of wine, region where it was produced, year it was produced and other things not related to wine chemistry. Trying out other models may also lead to better results. Say, I have a hunch that tree-based methods would do well in this case.
+Foi criado um modelo linear, mas como citado acima esse timo de modelo captura apenas relações lineares, aquelas pertencentes a outras familias de funções não puderam ser capturadas for esse modelo, talvez svms, gbms ou outros modelos de maior cardinalidade consigam obter informação inferencial significante.
 
 ------
 
-# Final Plots and Summary
+# Gráficos Finais e Sumário
 
-### Plot One
-
+### Primeiro Gráfico
 ```{r Plot_One}
-ggplot(data = wine, aes(x = quality, y = alcohol)) +
-    geom_jitter(alpha = .3) +
-    geom_boxplot(aes(group = cut_width(quality, 1)), color = 'red', alpha = .3, outlier.shape = NA) +
-    # asterisks mark mean values for each wine grade
-    stat_summary(fun.y = mean, geom = 'text', label = '*', size = 10, color = 'blue') +
-    scale_x_continuous(breaks = seq(min(wine$quality), max(wine$quality))) +
-    scale_y_continuous(breaks = seq(8, 14, .5)) +
-    labs(x = 'Wine grade', y = 'Alcohol (% by volume)') +
-    ggtitle('Alcohol content across wine grades')
-```
-
-### Description One
-
-This box plot supports our finding saying that the strongest positive correlation our main variable of interest is involved in is quality vs alcohol (0.436). An interesting thing here is that for lower wine grades, we can actually observe a negative downward trend that gets reversed only from grade 5 onwards. Thus, for wines of up to grade 5, the lower the alcohol content, the better a wine tends to be; after that wine quality grows linearly with increasing alcohol content.
-
-Moreover, the median (and mean as well) alcohol content of best wines looks significantly different from that of worst wines, which can be used to more or less reliably tell a quality wine from a poor one.
-
-### Plot Two
-```{r Plot_Two}
-density_plot(wine$residual.sugar, 'Reds') +
+density_plot(wine$residual.sugar, 'Greens') +
   scale_x_log10(breaks = seq(1, 15, 2)) +
   scale_y_continuous(breaks = seq(0, 1.5, .25)) +
-  labs(x = 'Residual sugar (grams per liter)', y = 'Density', color = 'Wine grade') +
+  labs(x = 'Açúcar Residual por Litro', y = 'Densidade', color = 'Nota do Vinho') +
   theme_dark() +
-  ggtitle('Density of residual sugar on log scale by wine grade')
+  ggtitle('Densidade por açúcar residual em escala log segmentado por nota') +
+  theme_linedraw()
 ```
 
-### Description Two
+### ### Descrição do Primeiro Gráfico
 
-When plotted unmodified, the residual sugar distribution is highly skewed and has a long right tail. However, when log-transformed, the distribution becomes bimodal. When I later color-coded the plot, I saw the distribution was in fact bimodal across all the wine grades. Intrigued by this phenomenon, I read a few specialized articles on residual sugar in wines, but couldn't find any explanation that would satisfy me. Therefore I'm inclined to think, for the lack of proof to the contrary, that it's just a regional thing specific to Portuguese wines.
+Vemos que a densidade por açucar residual tem uma distribuição bimodal para os vinhos de maior qualidade e uma cauda pesada para os de menor qualidade mas de forma pouco significativa, embora tivessemos observado uma correlação significativa nos graficos anteriores, esse grafico mostra que dada as caracteristicas não há nada significante.
 
-### Plot Three
+### Segundo Gráfico
+
+```{r Plot_Two}
+ggplot(data = wine, aes(x = quality, y = alcohol)) +
+  geom_jitter(alpha = .3) +
+  geom_boxplot(aes(group = cut_width(quality, 1)), alpha = .3, outlier.shape = NA) +
+  stat_summary(fun.y = mean, geom = 'text', label = '*', size = 10) +
+  scale_x_continuous(breaks = seq(min(wine$quality), max(wine$quality))) +
+  scale_y_continuous(breaks = seq(8, 14, .5)) +
+  labs(x = 'Nota do Vinho', y = '(%) Alcool') +
+  ggtitle('Distribuição percentual entre alcool e notas') +
+  theme_linedraw()
+```
+
+### Descrição do Segundo Gráfico
+
+Esse gráfico demonstra a correlação positiva entre o alcool e a qualidade do vinho, embora não seja muito alta, um fator interessante é que para as notas menores que 5 essa tendencia não ocorre mais, embora tenhamos poucas amostras. Vemos que os valores mais nos extremos tem poucas amostras sendo a maior concentração na nota 5 e 6.
+
+### Terceiro Gráfico
 ```{r Plot_Three}
 f_scatter_plot('alcohol', 'total.sulfur.dioxide') +
   scale_x_continuous(breaks = seq(8, 14, 1)) +
-  labs(x = 'Alcohol (% by volume)', y = 'Total sulfur dioxide (milligrams per liter)') +
-  ggtitle('Alcohol vs total sulfur dioxide scatter plot faceted by wine grade')
+  labs(x = '(%) Alcool', y = 'Dioxido de Enxofre (ml/l)') +
+  ggtitle('Alcool por total dioxido de enxofre segmentado por qualidade') +
+  theme_linedraw()
 ```
 
-### Description Three
+### Descrição do Terceiro Gráfico
 
-This faceted scatter plot illustrates the third strongest negative correlation discovered during the analysis - alcohol vs total SO2. Each subplot contains a line of best fit that visually reinforces the trend across wine grades. One interesting observation here is that with best and worst wines, the features display little to no correlation whatsoever, whereas for wines of grades 4 through 8, a clearly negative downward trend manifests itself. It might be an indication of the fact that this particular combination of features is a bad candidate for predicting wine quality. Indeed, when I was building a linear model, alcohol turned out to be the best contributor to the overall quality of prediction, whereas total SO2 added absolutely nothing to improve it and therefore was not included in the resulting model.
+Esse gráfico segmentado mostra o terceiro par de variáveis de maior correlação, vemos aqui que também para esse par não há clara correlação, variando positivo e negativamente entre as notas, não sendo de forma significativa.
 
 ------
 
-# Reflection
+# Reflexão
 
-The dataset I've analyzed contains information on almost 5,000 white wines across 11 variables plus the output variable based on sensory data, that is a grade on a scale of 0 to 10 given to each wine sample by professional wine judges. This dataset is restricted to Portuguese wines and contains only their physico-chemical properties.
+O conjunto de dados tem 1599 registros com 11 variáveis (de aspecto químico) sendo elas fixed acidity, volatile acidity, citric acid, residual sugar, chlorides, free sulfur dioxide, total sulfur dioxide, density, pH, sulphates e alcohol + qualidade do vinho (de 0 a 10) reportada por profissionais da área. Esse dataset provem de um estudo feito por Cortez et al. obtendo dados de diversos vinhos de origem portuguesa, com o objetivo de modelar a qualidade do vinho dado atributos quimicos.
 
-I began my analysis by building histograms of each feature to understand their distribution. They turned out to be normally distributed, with a few notable exceptions (take residual sugar as an example), where I observed heavy skew and long tails. Log-transforming these variables helped me deal with this abnormality. I also defined thresholds for poor (grade 4 and under) and excellent (grade 8 and over) wines, then subset my dataset using these thresholds and plotted distributions of individual features across poor and excellent wines side by side. This helped me see whether these distributions were very different and identify a few potential candidates that could be useful in telling a low-quality wine from a better one.
+A analise foi feita primeiramente com a construção de histogramas para analisar separadamente as distribuições de cada atributo dos dados, em grande parte os dados apresentavam uma distribuição Gaussiana normal e para alguns casos distribuições binormais ou de caudas pesadas. Aplicando a transformação log para esses casos foi possivel analisar melhor espacialmente esses dados. Também foram aplicados alguns filtros para remover outliers. Por fim nas transformações foi definido um intervalo para vinhos bons e ruins sepandando-os de forma binaria para simplificar a analise e poder encotrar atributos em potencial que explicassem as correlações com a qualidade.
 
-I went on to explore pairwise relationships between the features and pick out the most strongly correlated (both positively and negatively) pairs to focus my analysis on them. To my surprise, the main variable of interest - quality - wasn't involved in any of the strongest correlations identified. I built a few scatter plots and included a line of best fit for each of them to more clearly see the general trend in the data points. Then I added a few box plots that reinforced my earlier findings and offered some new insights.
+Em seguida foram avaliados pares de variáveis sobre suas distribuições e correlações sendo escolhidos aqueles pares de maior correlação selecionados para uma analise focada. E contra a minha intuição inicial o atributo qualidade não teve correlação linear siginificativa com  nenhum outro atributo. Então uma abordagem mais abrangente foi colocada em pratica segmentado por qualidade da nota e distribuição das variavéis, essa posteriomente combinada com uma terceira variável.
 
-My greatest success was finding out that alcohol content was the most influential feature that could more or less reliably be used to differentiate between poor and excellent wines. Indeed, when I later built a linear model to predict a wine grade, this feature alone contributed over 70% to the overall prediction quality.
+Foram obtidas algumas correlações com a qualidade significantes, como alcool e açucar residual, porém o poder explicativo não foi alto, em seguida uma regressão foi ajustada aos dados nao mostrando explicação da variação significativa.
 
-In the final part of my analysis, I used wine grades to color-code and facet a few plots that I'd built previously to see if any variables reinforce each other across any of the wine grades. The main finding here was that in the two most strongly correlated pairs the corelation was so pronounced that the trend stayed the same across all wine grades: it was always upward for density vs residual sugar and downward for alcohol vs density. The situation was a bit different for more weakly correlated pairs: the trend did stay the same across most wine grades, but with worst or best wines, the features I was analyzing displayed little to no correlation at all (for example, alcohol vs total SO2), which signaled these combinations were probably not the best predictors of wine quality. I tested these findings when building a linear model and excluded the worst contributors from the final version.
+Na parte final usei segmentação das qualidades para ajustar regressões a elas, permitindo analisar separadamente, também não foi notavel correlações fortes para esse tipo de grafico.
 
-I've also bumped into a couple of obstacles along the way. First, I found out that the residual sugar distribution, when log-transformed, is bimodal across all wine grades. I've been struggling to explain this phenomenon for some time and even read a few specialized articles on the topic, but found no satisfactory explanation so far. So I'm inclined to believe this phenomenon is specific to Portuguese wines, since that's what I've been analyzing all along.
+Por fim foram feitos graficos conclusivos sobre as relações entre atributos quimicos e qualidade do vinho, porém sem os resultados esperados para um hipotese linear.
 
-Another thing I had difficulties with was the linear model that I'd built. It was able to explain only 28% of the variance in wine quality, which I found to be a pretty poor result. At first, I thought I was doing something wrong and actually spent a couple of days trying to engineer new features and combine them in various ways (to no avail), but then I realized that some other factors were at play and physico-chemical properties alone were not enough of a quality predictor.
-
-And this realization leads me to suggestions on how to improve this analysis. First and foremost, more data would be nice. 5,000 wine samples is alright, but given the number of wines in the world, it's just a drop in the ocean. Besides, the dataset is restricted to only Portuguese wines, which significantly limits its value and ability to represent the whole population. Second, as I mentioned above, there must be some other features that heavily influence wine quality. Better results might have been obtained if we had information about a region where a wine was produced, the year it was produced, grape type, selling price and wine brand, to name a few. Also, it might be a good idea to test other kinds of models and see how they fare against each other. I guess more powerful models, like SVM or tree-based methods, could have demonstrated impressive results.
+Para melhorar tal analise como mostrado no artigo se usou uma svm para obter bons resultados, fazendo combinações não lineares dos dados assim podem encontrar padrões mais significativos.
